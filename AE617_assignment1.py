@@ -1,32 +1,55 @@
+'''
+AE617: Numerical Methods for Conservation Laws
+ASSIGNMENT 1 : Code for numeically solving Hyperbolic Partial Differential Equations
+Equations listed in Assignment 1 @ https://github.com/naveenaero/Numerical-Methods-for-Conservation-Laws
+'''
+
+#Import necessary files libraries for plotting and Animation
 from numpy import *
 from matplotlib import *
 from pylab import *
 
-n1 = 40
-n2 = 80
-x1 = linspace(-1,1,40);
-x2 = linspace(-1,1,80);
-dx1 = x1[1]-x1[0];			
-dx2 = x2[1]-x2[0];
+#Take User input for Grid size, dt/dx and Time upto which the simulation will run
+n = int(raw_input('Enter the number of points in the interval [-1,1]:'))
+dtdx = float(raw_input('Enter the value of dt/dx:'))
+index = int(raw_input('Enter the question number which you want to see? :'))
+Time = float(raw_input('Enter the time at which you want to capture the plot:'))
 
-dtdx = 0.8
+# print type(n),type(dtdx,type(index,type(Time)))
+print dtdx
+#generate grid
+x1 = linspace(-1,1,n)
+dx = x1[1]-x1[0]			
+dt = dx*dtdx
+u = zeros((n,int(10/dt)));	#matrix storing values of conserved variable
+f = zeros((n,int(10/dt)));	#matrix storing values of flux function 
 
-dt1 = dx1*0.8
-dt2 = dx2*0.8
+print shape(x1),shape(u[:,int(4/dt)])
 
-u = zeros((40,int(100/dt1)));
+#Initialise Grid
+for i in range(n):
+	if x1[i] > -1.0/3.0 and x1[i] < 1.0/3.0:
+		u[i,0] = 1
 
-u2 = zeros((80,int(4/dt2)));
-for i in range(80):
-	if i < 40:
-		if x1[i] > -1.0/3.0 and x1[i] < 1.0/3.0:
-			u[i,0] = 1
-	if x2[i] > -1.0/3.0 and x2[i] < 1.0/3.0:
-		u2[i,0] = 1
+# plot(x,u[:,0])
+# show()
 
-f = u
+if index == 1:
+	f = u;
+	# plot(x,f[:,0])
+	# show()
+if index == 2:
+	f[:,0] = u[:,0]**2/2;
+	plot(x1,f[:,0])
+	show()
+if index == 3:
+	f[:,0] = u[:,0]*(1-u[:,0]);
 
-def sigma(i,j,flux,cons_variable):
+
+
+# Function for returning the sign of wave speed at each grid point
+# Return 1 when +ve, -1 when -ve and 0 otherwise
+def calc_sigma(i,j,flux,cons_variable):
 	if cons_variable[i+1,j]-cons_variable[i,j]==0 or flux[i+1,j]-flux[i,j]==0:
 		return 0;
 	elif (flux[i+1,j]-flux[i,j])/(cons_variable[i+1,j]-cons_variable[i,j]) > 0:
@@ -34,30 +57,46 @@ def sigma(i,j,flux,cons_variable):
 	else:
 		return -1;
 
+# Function for applying the cyclic boundary condition
 def apply_boundary_condn(i,j,u):
 	if i==0 and j!=0:
-		u[i,j] = u[i+39,j-1];
+		u[i,j] = u[i+n-1,j-1];
+
+# Function for updating the flux values after each time instant
+def update_flux(j,f,u,index):
+	if index == 1:
+		f[:,j+1] = u[:,j+1];
+	if index == 2:
+		f[:,j+1] = u[:,j+1]**2/2;
+	if index == 3:
+		f[:,j+1] = u[:,j+1]*(1-u[:,j+1]);
 
 
-# def propagate(x,t,speed,u):
-# 	if speed >
 
 
-for t in range(int(80/dt1)):
-	for x in range(0,n1-1):
-		apply_boundary_condn(x,t,u);
-		speed = sigma(x,t,f,u);
-		if speed >= 0:
+for t in range(int(9/dt)):				# Time Loop
+
+	for x in range(0,n-1):				# Space Loop 
+
+		apply_boundary_condn(x,t,u);	
+		speed = calc_sigma(x,t,f,u);
+
+		if speed > 0:					# If speed is positive, then apply backward difference at the (i+1)th point
 			u[x+1,t+1] = u[x+1,t] - dtdx*(u[x+1,t]-u[x,t]);
-		if speed < 0:
+		if speed < 0:					# If speed is negative, the apply forward difference at the ith point
 			u[x,t+1] = u[x,t] - dtdx*(u[x+1,t]-u[x,t])
-		
+		if speed == 0:					# If the speed is zero, then leave the (i+1)th point unchanges
+			u[x+1,t+1] = u[x+1,t];
+			# u[x,t+1] = u[x,t];
 
-#print u[:,4]
-plot(x1,u[:,int(4/dt1)])
-# plot(x2,u2)
-grid()
-show()
+	update_flux(t,f,u,index);			# Update Flux at the end of each space loop
+
+if Time <= 9:		
+	plot(x1,u[:,int(Time/dt)])
+	grid()
+	show()
+else:
+	print "Time out of bounds"
 
 
 		
