@@ -36,8 +36,6 @@ for i in range(n):
 
 if index == 1:
 	f = u;
-	# plot(x,f[:,0])
-	# show()
 if index == 2:
 	f[:,0] = u[:,0]**2/2;
 	plot(x1,f[:,0])
