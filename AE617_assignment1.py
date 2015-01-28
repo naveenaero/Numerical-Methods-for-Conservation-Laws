@@ -15,8 +15,6 @@ dtdx = float(raw_input('Enter the value of dt/dx:'))
 index = int(raw_input('Enter the question number which you want to see? :'))
 Time = float(raw_input('Enter the time at which you want to capture the plot:'))
 
-# print type(n),type(dtdx,type(index,type(Time)))
-print dtdx
 #generate grid
 x1 = linspace(-1,1,n)
 dx = x1[1]-x1[0]			
@@ -31,15 +29,12 @@ for i in range(n):
 	if x1[i] > -1.0/3.0 and x1[i] < 1.0/3.0:
 		u[i,0] = 1
 
-# plot(x,u[:,0])
-# show()
-
+# Initialise flux function
 if index == 1:
 	f = u;
 if index == 2:
 	f[:,0] = u[:,0]**2/2;
-	plot(x1,f[:,0])
-	show()
+	
 if index == 3:
 	f[:,0] = u[:,0]*(1-u[:,0]);
 
@@ -56,9 +51,9 @@ def calc_sigma(i,j,flux,cons_variable):
 		return -1;
 
 # Function for applying the cyclic boundary condition
-def apply_boundary_condn(i,j,u):
-	if i==0 and j!=0:
-		u[i,j] = u[i+n-1,j-1];
+def apply_boundary_condn(j,u):
+	if j!=0:
+		u[0,j] = u[n-1,j];
 
 # Function for updating the flux values after each time instant
 def update_flux(j,f,u,index):
@@ -76,17 +71,17 @@ for t in range(int(9/dt)):				# Time Loop
 
 	for x in range(0,n-1):				# Space Loop 
 
-		apply_boundary_condn(x,t,u);	
 		speed = calc_sigma(x,t,f,u);
 
 		if speed > 0:					# If speed is positive, then apply backward difference at the (i+1)th point
-			u[x+1,t+1] = u[x+1,t] - dtdx*(u[x+1,t]-u[x,t]);
+			u[x+1,t+1] = u[x+1,t] - dtdx*(f[x+1,t]-f[x,t]);
 		if speed < 0:					# If speed is negative, the apply forward difference at the ith point
-			u[x,t+1] = u[x,t] - dtdx*(u[x+1,t]-u[x,t])
+			u[x,t+1] = u[x,t] - dtdx*(f[x+1,t]-f[x,t])
 		if speed == 0:					# If the speed is zero, then leave the (i+1)th point unchanges
 			u[x+1,t+1] = u[x+1,t];
 			# u[x,t+1] = u[x,t];
 
+	apply_boundary_condn(t+1,u);
 	update_flux(t,f,u,index);			# Update Flux at the end of each space loop
 
 if Time <= 9:		
