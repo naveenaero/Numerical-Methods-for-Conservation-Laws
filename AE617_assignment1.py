@@ -13,7 +13,7 @@ from pylab import *
 n = int(raw_input('Enter the number of points in the interval [-1,1]:'))
 dtdx = float(raw_input('Enter the value of dt/dx:'))
 index = int(raw_input('Enter the question number which you want to see? :'))
-Time = float(raw_input('Enter the time at which you want to capture the plot:'))
+Time = float(raw_input('Enter the time at which you want to capture the plot(0 to 9):'))
 
 #generate grid
 x1 = linspace(-1,1,n)
@@ -25,9 +25,26 @@ f = zeros((n,int(10/dt)));	#matrix storing values of flux function
 print shape(x1),shape(u[:,int(4/dt)])
 
 #Initialise Grid
+
 for i in range(n):
 	if x1[i] > -1.0/3.0 and x1[i] < 1.0/3.0:
 		u[i,0] = 1
+
+count  = 0;
+position = 0;
+
+if index == 3:
+	for i in range(n):
+		if u[i,0] == 1 and u[i-1,0] == 0:
+			position = i;
+		if u[i,0] == 1:
+			count = count + 1;
+
+
+
+	u[position,0] = 0.5;
+	u[position+count,0] = 0.5;
+
 
 # Initialise flux function
 if index == 1:
@@ -81,11 +98,15 @@ for t in range(int(9/dt)):				# Time Loop
 			u[x+1,t+1] = u[x+1,t];
 			# u[x,t+1] = u[x,t];
 
-	apply_boundary_condn(t+1,u);
+	apply_boundary_condn(t+1,u);		# Apply cyclic boundary condition
 	update_flux(t,f,u,index);			# Update Flux at the end of each space loop
 
 if Time <= 9:		
 	plot(x1,u[:,int(Time/dt)])
+	xlabel('Space');
+	ylabel('Amplitude');
+	title('Q. ' + str(index) + ', grid points ' + str(n) + ', at time = ' +str(Time)+ ' seconds');
+	# savefig(filename);
 	grid()
 	show()
 else:
