@@ -96,8 +96,7 @@ for t in range(int(9/dt)):				# Time Loop
 			u[x,t+1] = u[x,t] - dtdx*(f[x+1,t]-f[x,t])
 		if speed == 0:					# If the speed is zero, then leave the (i+1)th point unchanges
 			u[x+1,t+1] = u[x+1,t];
-			# u[x,t+1] = u[x,t];
-
+			
 	apply_boundary_condn(t+1,u);		# Apply cyclic boundary condition
 	update_flux(t,f,u,index);			# Update Flux at the end of each space loop
 
